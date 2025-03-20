@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
-MONEYCNTL_URL = "https://www.moneycontrol.com/markets/global-indices/gift-nifty-gi"
+MONEYCNTL_URL = "https://www.moneycontrol.com/markets/global-indices/"
 
 def fetch_gift_nifty():
     headers = {
