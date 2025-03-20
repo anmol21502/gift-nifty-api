@@ -1,31 +1,44 @@
-from flask import Flask, jsonify
-import requests
-from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import time
+import logging
+from selenium.webdriver.chrome.service import Service
+from webdriver_manager.chrome import ChromeDriverManager
 
-app = Flask(__name__)
+# Configure logging
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
-MONEYCNTL_URL = "https://www.moneycontrol.com/markets/global-indices/"
+# Moneycontrol URL
+URL = "https://www.moneycontrol.com/markets/global-indices/"
 
-def fetch_gift_nifty():
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-    }
-    
-    response = requests.get(MONEYCNTL_URL, headers=headers)
-    soup = BeautifulSoup(response.text, "html.parser")
-    
-    # Locate Gift NIFTY data
-    nifty_section = soup.find("div", class_="gIwnfA")  # Adjust this class based on Moneycontrol's structure
-    if nifty_section:
-        change = nifty_section.find("span", class_="chg").text.strip()
-        return {"change": change}
-    
-    return {"change": "N/A"}
+# More specific class targeting
+TARGET_CLASS_1 = "marketData_web_greentext__D2nTQ"
+TARGET_CLASS_2 = "marketData_web_tright__qE8_a"
 
-@app.route('/gift-nifty', methods=['GET'])
-def get_gift_nifty():
-    data = fetch_gift_nifty()
-    return jsonify(data)
+# Set up Selenium WebDriver options
+chrome_options = Options()
+chrome_options.add_argument("--headless")  # Run in headless mode
+chrome_options.add_argument("--disable-gpu")
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-blink-features=AutomationControlled")  # Prevent detection
+chrome_options.add_argument(
+    "user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.5481.177 Safari/537.36"
+)
 
-if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=5000)
+# Auto-download ChromeDriver using WebDriver Manager
+service = Service(ChromeDriverManager().install())
+driver = webdriver.Chrome(service=service, options=chrome_options)
+
+def fetch_market_data():
+    try:
+        driver.get(URL)
+        logging.info(f"Page Title: {driver.title}")
+
+        # Wait for page to load
+        wait = WebDriverWait(driver, 10)
+
+        # More specific XPath targeting both class names
+        xpath = f"//td[contains(@class, '{TA
